@@ -55,13 +55,15 @@ async Task ReadPipeAsync(PipeReader reader, TcpClient client)
             Console.WriteLine($"Método: {request.Method}");
             Console.WriteLine($"Path: {request.Path}");
 
+            string responseText = Routing(request.Path!);
+
             // Aqui, preciso responder o cliente
             string response = 
                 "HTTP/1.1 200 OK\r\n" +
-                "Content-Length: 12\r\n" +
+                $"Content-Length: {responseText.Length}\r\n" +
                 "Content-Type: text/plain\r\n" +
                 "\r\n" +
-                "Hello World!";
+                $"{responseText}";
 
             byte[] responseBytes = Encoding.UTF8.GetBytes(response);
 
@@ -112,4 +114,17 @@ async Task HandleClient(TcpClient client)
     Task reading = ReadPipeAsync(pipe.Reader, client);
 
     await Task.WhenAll(writing, reading);
+}
+
+string Routing(string path)
+{
+    string body = path switch
+    {
+        "/" => "Hello World!",
+        "/cursos" => "Cursos",
+        "/alunos" => "Alunos",
+        _ => "404"
+    };
+
+    return body;
 }
